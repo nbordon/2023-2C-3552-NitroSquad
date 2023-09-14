@@ -6,7 +6,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace TGC.MonoGame.TP.Content.Models
+namespace TGC.MonoGame.TP.Scenarios
 {
     /// <summary>
     /// A City Scene to be drawn
@@ -21,6 +21,7 @@ namespace TGC.MonoGame.TP.Content.Models
         private Model Model { get; set; }
         private List<Matrix> WorldMatrices { get; set; }
         private Effect Effect { get; set; }
+        private Texture2D Texture { get; set; }
 
 
         /// <summary>
@@ -34,6 +35,8 @@ namespace TGC.MonoGame.TP.Content.Models
 
             // Load an effect that will be used to draw the scene
             Effect = content.Load<Effect>(ContentFolderEffects + "BasicShader");
+
+            Texture = content.Load<Texture2D>(ContentFolder3D + "tex/Palette");
 
             // Get the first texture we find
             // The city model only contains a single texture
@@ -57,7 +60,7 @@ namespace TGC.MonoGame.TP.Content.Models
             // Create a list of places where the city model will be drawn
             WorldMatrices = new List<Matrix>()
             {
-				Matrix.Identity,
+                Matrix.Identity,
                 Matrix.CreateTranslation(Vector3.Right * DistanceBetweenCities),
                 Matrix.CreateTranslation(Vector3.Left * DistanceBetweenCities),
                 Matrix.CreateTranslation(Vector3.Forward * DistanceBetweenCities),
@@ -65,7 +68,7 @@ namespace TGC.MonoGame.TP.Content.Models
                 Matrix.CreateTranslation((Vector3.Forward + Vector3.Right) * DistanceBetweenCities),
                 Matrix.CreateTranslation((Vector3.Forward + Vector3.Left) * DistanceBetweenCities),
                 Matrix.CreateTranslation((Vector3.Backward + Vector3.Right) * DistanceBetweenCities),
-				Matrix.CreateTranslation((Vector3.Backward + Vector3.Left) * DistanceBetweenCities),
+                Matrix.CreateTranslation((Vector3.Backward + Vector3.Left) * DistanceBetweenCities),
             };
 
         }
@@ -96,6 +99,7 @@ namespace TGC.MonoGame.TP.Content.Models
                     Effect.Parameters["World"].SetValue(meshWorld * worldMatrix);
                     Effect.Parameters["View"].SetValue(view);
                     Effect.Parameters["Projection"].SetValue(projection);
+                    Effect.Parameters["ModelTexture"].SetValue(Texture);
 
                     // Draw the mesh
                     mesh.Draw();

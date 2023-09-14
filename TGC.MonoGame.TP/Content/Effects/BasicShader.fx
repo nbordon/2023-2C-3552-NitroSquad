@@ -120,7 +120,6 @@ VertexShaderOutput MainVS(in VertexShaderInput input)
 float4 MainPS(VertexShaderOutput input) : COLOR
 {
     float3 color = tex2D(TextureSampler, input.TextureCoordinate.xy).rgb;
-    
     return float4(color, 1);
 }
 

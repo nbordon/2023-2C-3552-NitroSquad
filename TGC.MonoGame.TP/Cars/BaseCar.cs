@@ -3,7 +3,7 @@ using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using System;
 
-namespace TGC.MonoGame.TP.Content.Models
+namespace TGC.MonoGame.TP.Cars
 {
 	class BaseCar
 	{
@@ -39,6 +39,7 @@ namespace TGC.MonoGame.TP.Content.Models
 		public Model Model;
 		public Matrix World = Matrix.Identity;
 		public Matrix Rotation = Matrix.Identity;
+		public Matrix Scale = Matrix.Identity;
 		public Vector3 Position = Vector3.Zero;
 		public Vector3 Direction = Vector3.Backward;
 		public Vector3 DirectionSpeed = Vector3.Backward;
@@ -54,6 +55,7 @@ namespace TGC.MonoGame.TP.Content.Models
 		public Matrix BackRightWheelTransform;
 		public Matrix CarTransform;
 		public Matrix[] BoneTransforms;
+		public Texture2D CarTexture;
 		#endregion Properties
 
 		public BaseCar() { }
@@ -85,7 +87,7 @@ namespace TGC.MonoGame.TP.Content.Models
 				DirectionSpeed.Y = 0f;
 			}
 
-			World = Rotation * Matrix.CreateTranslation(Position);
+			World = Scale * Rotation * Matrix.CreateTranslation(Position);
 		}
 
 		public void Draw(GameTime gameTime, Matrix view, Matrix projection)
@@ -115,6 +117,7 @@ namespace TGC.MonoGame.TP.Content.Models
 				Effect.Parameters["World"].SetValue(meshWorld);
 				Effect.Parameters["View"].SetValue(view);
 				Effect.Parameters["Projection"].SetValue(projection);
+				Effect.Parameters["ModelTexture"].SetValue(CarTexture);
 				mesh.Draw();
 			}
 		}
@@ -132,7 +135,7 @@ namespace TGC.MonoGame.TP.Content.Models
 			{
 				float boost = IsUsingBoost ? DefaultBoostSpeed : 1f;
 				CurrentSpeed += Acceleration[CurrentGear] * boost;
-				if (CurrentSpeed > MaxSpeed[CurrentGear]) CurrentGear++;
+				if (CurrentSpeed > MaxSpeed[CurrentGear] && CurrentGear < MaxSpeed.Length - 1) CurrentGear++;
 				CurrentSpeed = CurrentSpeed > MaxSpeed[CurrentGear] * boost ? MaxSpeed[CurrentGear] * boost : CurrentSpeed;
 			}
 

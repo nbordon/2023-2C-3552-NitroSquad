@@ -2,7 +2,7 @@
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework;
 
-namespace TGC.MonoGame.TP.Content.Models
+namespace TGC.MonoGame.TP.Cars
 {
 	class Ambulance : BaseCar
 	{
@@ -10,6 +10,8 @@ namespace TGC.MonoGame.TP.Content.Models
 		{
 			Model = content.Load<Model>(ContentFolder3D + "ambulance");
 			Effect = content.Load<Effect>(ContentFolderEffects + "BasicShader");
+			CarTexture = content.Load<Texture2D>(ContentFolder3D + "tex/Palette");
+			Effect.Parameters["ModelTexture"].SetValue(CarTexture);
 
 			FrontRightWheelBone = Model.Bones["wheel_frontLeft"];
 			FrontLeftWheelBone = Model.Bones["wheel_frontRight"];
@@ -36,6 +38,18 @@ namespace TGC.MonoGame.TP.Content.Models
 			DefaultBoostSpeed = 3f;
 			MaxSpeed = new float[6] { 800f, 0f, 900f, 1500f, 2000f, 3500f }; // R-N-1-2-3-4
 			Acceleration = new float[6] { 15f, -3f, 20f, 15f, 7.5f, 2f }; // R-N-1-2-3-4
+		}
+
+		public void Draw(Matrix view, Matrix projection)
+		{
+			foreach (var mesh in Model.Meshes)
+			{
+				var meshWorld = BoneTransforms[mesh.ParentBone.Index];
+				Effect.Parameters["World"].SetValue(meshWorld);
+				Effect.Parameters["View"].SetValue(view);
+				Effect.Parameters["Projection"].SetValue(projection);
+				mesh.Draw();
+			}
 		}
 	}
 }

@@ -1,28 +1,30 @@
 ﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
-using TGC.MonoGame.TP.Content.Models;
+using TGC.MonoGame.TP.Cameras;
+using TGC.MonoGame.TP.Cars;
+using TGC.MonoGame.TP.Scenarios;
 
 namespace TGC.MonoGame.TP
 {
+
     /// <summary>
     ///     Esta es la clase principal del juego.
     ///     Inicialmente puede ser renombrado o copiado para hacer mas ejemplos chicos, en el caso de copiar para que se
     ///     ejecute el nuevo ejemplo deben cambiar la clase que ejecuta Program <see cref="Program.Main()" /> linea 10.
     /// </summary>
     public class TGCGame : Game
-    {
-        public const string ContentFolder3D = "Models/";
+	{
+		public const string ContentFolder3D = "Models/";
         public const string ContentFolderEffects = "Effects/";
         public const string ContentFolderMusic = "Music/";
         public const string ContentFolderSounds = "Sounds/";
         public const string ContentFolderSpriteFonts = "SpriteFonts/";
         public const string ContentFolderTextures = "Textures/";
-        private RacingCar RacingCar { get; set; }
-		//private Ambulance Ambulance { get; set; }
-		private CityScene CityScene { get; set; }
-        private FollowCamera FollowCamera { get; set; }
-		//private FollowCameraRight FollowCamera { get; set; }
+        private BaseCar MainCar;
+        private CityScene CityScene;
+		private TestScenario TestScenario;
+		private FollowCamera FollowCamera;
 
 		/// <summary>
 		///     Constructor del juego.
@@ -40,12 +42,6 @@ namespace TGC.MonoGame.TP
 
         private GraphicsDeviceManager Graphics { get; }
         private SpriteBatch SpriteBatch { get; set; }
-        private Model Model { get; set; }
-        private Effect Effect { get; set; }
-        private float Rotation { get; set; }
-        private Matrix World { get; set; }
-        private Matrix View { get; set; }
-        private Matrix Projection { get; set; }
 
         /// <summary>
         ///     Se llama una sola vez, al principio cuando se ejecuta el ejemplo.
@@ -67,7 +63,6 @@ namespace TGC.MonoGame.TP
                 
             // Creo una camara para seguir a nuestro auto.
             FollowCamera = new FollowCamera(GraphicsDevice.Viewport.AspectRatio);
-			//FollowCamera = new FollowCameraRight(GraphicsDevice.Viewport.AspectRatio);
 
 			base.Initialize();
         }
@@ -82,18 +77,14 @@ namespace TGC.MonoGame.TP
             // Aca es donde deberiamos cargar todos los contenido necesarios antes de iniciar el juego.
             SpriteBatch = new SpriteBatch(GraphicsDevice);
 
-            // Creo la escena de la ciudad.
-            CityScene = new CityScene(Content);
+			// Creo la escena de la ciudad.
+			//CityScene = new CityScene(Content);
+			TestScenario = new TestScenario(Content, GraphicsDevice);
 
 			// La carga de contenido debe ser realizada aca.
-			RacingCar = new RacingCar(Content);
-			//Ambulance = new Ambulance(Content);
+			MainCar = new RacingCar(Content);
 
-            // Cargo un efecto basico propio declarado en el Content pipeline.
-            // En el juego no pueden usar BasicEffect de MG, deben usar siempre efectos propios.
-            Effect = Content.Load<Effect>(ContentFolderEffects + "BasicShader");
-
-            base.LoadContent();
+			base.LoadContent();
         }
 
         /// <summary>
@@ -104,22 +95,14 @@ namespace TGC.MonoGame.TP
         protected override void Update(GameTime gameTime)
         {
             // Aca deberiamos poner toda la logica de actualizacion del juego.
-            var keyboardState = Keyboard.GetState();
-            if (keyboardState.IsKeyDown(Keys.Escape))
-            {
-                //Salgo del juego.
-                Exit();
-            }
+            if (Keyboard.GetState().IsKeyDown(Keys.Escape)) Exit(); //Salgo del juego.
 
 			// La logica debe ir aca.
-			RacingCar.SetKeyboardState();
-			RacingCar.Update(gameTime);
-			//Ambulance.SetKeyboardState();
-			//Ambulance.Update(gameTime);
+			MainCar.SetKeyboardState();
+			MainCar.Update(gameTime);
 
 			// Actualizo la camara, enviandole la matriz de mundo del auto.
-			FollowCamera.Update(gameTime, RacingCar.World);
-			//FollowCamera.Update(gameTime, Ambulance.World);
+			FollowCamera.Update(gameTime, MainCar.World);
 
             base.Update(gameTime);
         }
@@ -131,14 +114,14 @@ namespace TGC.MonoGame.TP
         protected override void Draw(GameTime gameTime)
         {
             // Aca deberiamos poner toda la logia de renderizado del juego.
-            GraphicsDevice.Clear(Color.Gray);
+            GraphicsDevice.Clear(Color.Black);
 
 			// Dibujo la ciudad.
-			CityScene.Draw(gameTime, FollowCamera.View, FollowCamera.Projection);
+			// CityScene.Draw(gameTime, FollowCamera.View, FollowCamera.Projection);
+			TestScenario.Draw(gameTime, FollowCamera.View, FollowCamera.Projection);
 
 			// El dibujo del auto debe ir aca.
-			RacingCar.Draw(gameTime, FollowCamera.View, FollowCamera.Projection);
-			//Ambulance.Draw(gameTime, FollowCamera.View, FollowCamera.Projection);
+			MainCar.Draw(gameTime, FollowCamera.View, FollowCamera.Projection);
 		}
 
         /// <summary>

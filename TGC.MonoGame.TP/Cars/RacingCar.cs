@@ -1,16 +1,16 @@
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
-using static System.Formats.Asn1.AsnWriter;
 
-namespace TGC.MonoGame.TP.Content.Models
+namespace TGC.MonoGame.TP.Cars
 {
     class RacingCar : BaseCar
 	{
         public RacingCar(ContentManager content)
         {
             Model = content.Load<Model>(ContentFolder3D + "racingcar/racingcar");
-            Effect = content.Load<Effect>(ContentFolderEffects + "BasicShader");
+			CarTexture = content.Load<Texture2D>(ContentFolder3D + "racingcar/Vehicle_basecolor");
+			Effect = content.Load<Effect>(ContentFolderEffects + "BasicShader");
 
 			FrontRightWheelBone = Model.Bones["WheelA"];
             FrontLeftWheelBone = Model.Bones["WheelB"];
