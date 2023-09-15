@@ -22,7 +22,6 @@ namespace TGC.MonoGame.TP
         public const string ContentFolderSpriteFonts = "SpriteFonts/";
         public const string ContentFolderTextures = "Textures/";
         private BaseCar MainCar;
-        private CityScene CityScene;
 		private TestScenario TestScenario;
 		private FollowCamera FollowCamera;
 
@@ -77,11 +76,8 @@ namespace TGC.MonoGame.TP
             // Aca es donde deberiamos cargar todos los contenido necesarios antes de iniciar el juego.
             SpriteBatch = new SpriteBatch(GraphicsDevice);
 
-			// Creo la escena de la ciudad.
-			//CityScene = new CityScene(Content);
-			TestScenario = new TestScenario(Content, GraphicsDevice);
-
 			// La carga de contenido debe ser realizada aca.
+			TestScenario = new TestScenario(Content, GraphicsDevice);
 			MainCar = new RacingCar(Content);
 
 			base.LoadContent();
@@ -113,11 +109,10 @@ namespace TGC.MonoGame.TP
         /// </summary>
         protected override void Draw(GameTime gameTime)
         {
-            // Aca deberiamos poner toda la logia de renderizado del juego.
+            // Aca deberiamos poner toda la logica de renderizado del juego.
             GraphicsDevice.Clear(Color.Black);
 
 			// Dibujo la ciudad.
-			// CityScene.Draw(gameTime, FollowCamera.View, FollowCamera.Projection);
 			TestScenario.Draw(gameTime, FollowCamera.View, FollowCamera.Projection);
 
 			// El dibujo del auto debe ir aca.

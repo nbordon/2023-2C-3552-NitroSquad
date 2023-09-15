@@ -39,17 +39,5 @@ namespace TGC.MonoGame.TP.Cars
 			MaxSpeed = new float[6] { 800f, 0f, 900f, 1500f, 2000f, 3500f }; // R-N-1-2-3-4
 			Acceleration = new float[6] { 15f, -3f, 20f, 15f, 7.5f, 2f }; // R-N-1-2-3-4
 		}
-
-		public void Draw(Matrix view, Matrix projection)
-		{
-			foreach (var mesh in Model.Meshes)
-			{
-				var meshWorld = BoneTransforms[mesh.ParentBone.Index];
-				Effect.Parameters["World"].SetValue(meshWorld);
-				Effect.Parameters["View"].SetValue(view);
-				Effect.Parameters["Projection"].SetValue(projection);
-				mesh.Draw();
-			}
-		}
 	}
 }

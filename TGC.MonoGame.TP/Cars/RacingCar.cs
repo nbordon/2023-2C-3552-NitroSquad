@@ -11,6 +11,7 @@ namespace TGC.MonoGame.TP.Cars
             Model = content.Load<Model>(ContentFolder3D + "racingcar/racingcar");
 			CarTexture = content.Load<Texture2D>(ContentFolder3D + "racingcar/Vehicle_basecolor");
 			Effect = content.Load<Effect>(ContentFolderEffects + "BasicShader");
+			Effect.Parameters["ModelTexture"].SetValue(CarTexture);
 
 			FrontRightWheelBone = Model.Bones["WheelA"];
             FrontLeftWheelBone = Model.Bones["WheelB"];

@@ -108,7 +108,6 @@ namespace TGC.MonoGame.TP.Cars
 
 			// Look up combined bone matrices for the entire model.
 			Model.CopyAbsoluteBoneTransformsTo(BoneTransforms);
-
 			// For each mesh in the model,
 			foreach (var mesh in Model.Meshes)
 			{
@@ -117,7 +116,6 @@ namespace TGC.MonoGame.TP.Cars
 				Effect.Parameters["World"].SetValue(meshWorld);
 				Effect.Parameters["View"].SetValue(view);
 				Effect.Parameters["Projection"].SetValue(projection);
-				Effect.Parameters["ModelTexture"].SetValue(CarTexture);
 				mesh.Draw();
 			}
 		}

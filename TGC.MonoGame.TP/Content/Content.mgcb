@@ -240,6 +240,25 @@
 /processorParam:TextureFormat=Color
 /build:Models/racingcar/Vehicle_rougness.png
 
+#begin Models/sofa.fbx
+/importer:FbxImporter
+/processor:ModelProcessor
+/processorParam:ColorKeyColor=0,0,0,0
+/processorParam:ColorKeyEnabled=True
+/processorParam:DefaultEffect=BasicEffect
+/processorParam:GenerateMipmaps=True
+/processorParam:GenerateTangentFrames=False
+/processorParam:PremultiplyTextureAlpha=True
+/processorParam:PremultiplyVertexColors=True
+/processorParam:ResizeTexturesToPowerOfTwo=False
+/processorParam:RotationX=0
+/processorParam:RotationY=0
+/processorParam:RotationZ=0
+/processorParam:Scale=1
+/processorParam:SwapWindingOrder=False
+/processorParam:TextureFormat=Compressed
+/build:Models/sofa.fbx
+
 #begin Models/tex/Palette.jpg
 /importer:TextureImporter
 /processor:TextureProcessor
@@ -252,6 +271,30 @@
 /processorParam:TextureFormat=Color
 /build:Models/tex/Palette.jpg
 
+#begin Textures/asphalt_road.jpg
+/importer:TextureImporter
+/processor:TextureProcessor
+/processorParam:ColorKeyColor=255,0,255,255
+/processorParam:ColorKeyEnabled=True
+/processorParam:GenerateMipmaps=False
+/processorParam:PremultiplyAlpha=True
+/processorParam:ResizeToPowerOfTwo=False
+/processorParam:MakeSquare=False
+/processorParam:TextureFormat=Color
+/build:Textures/asphalt_road.jpg
+
+#begin Textures/grass.jpg
+/importer:TextureImporter
+/processor:TextureProcessor
+/processorParam:ColorKeyColor=255,0,255,255
+/processorParam:ColorKeyEnabled=True
+/processorParam:GenerateMipmaps=False
+/processorParam:PremultiplyAlpha=True
+/processorParam:ResizeToPowerOfTwo=False
+/processorParam:MakeSquare=False
+/processorParam:TextureFormat=Color
+/build:Textures/grass.jpg
+
 #begin Textures/stones.jpg
 /importer:TextureImporter
 /processor:TextureProcessor
@@ -263,4 +306,16 @@
 /processorParam:MakeSquare=False
 /processorParam:TextureFormat=Color
 /build:Textures/stones.jpg
+
+#begin Textures/wood.jpeg
+/importer:TextureImporter
+/processor:TextureProcessor
+/processorParam:ColorKeyColor=255,0,255,255
+/processorParam:ColorKeyEnabled=True
+/processorParam:GenerateMipmaps=False
+/processorParam:PremultiplyAlpha=True
+/processorParam:ResizeToPowerOfTwo=False
+/processorParam:MakeSquare=False
+/processorParam:TextureFormat=Color
+/build:Textures/wood.jpeg
 
