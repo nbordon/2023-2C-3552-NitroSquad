@@ -92,7 +92,8 @@ namespace TGC.MonoGame.TP
             // Aca deberiamos poner toda la logica de actualizacion del juego.
             if (Keyboard.GetState().IsKeyDown(Keys.Escape)) Exit(); //Salgo del juego.
 			if (Scenario.IsAbleToChangeGizmosVisibility(gameTime) && Keyboard.GetState().IsKeyDown(Keys.G)) Scenario.ChangeGizmosVisibility(); //Activo/Desactivo el gizmos
-			if (Camera.IsAbleToChangeCamera(gameTime) && Keyboard.GetState().IsKeyDown(Keys.V)) Camera.ChangeCamera(); //Activo/Desactivo vista isometrica
+			if (Camera.IsAbleToChangeCamera(gameTime) && Keyboard.GetState().IsKeyDown(Keys.V)) Camera.ChangeCamera();
+			if (MainCar.IsAbleToEnableGodMode(gameTime) && Keyboard.GetState().IsKeyDown(Keys.P)) MainCar.EnableGodMode();
 
 			// La logica debe ir aca.
 			MainCar.SetKeyboardState();

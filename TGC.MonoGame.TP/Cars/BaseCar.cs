@@ -13,16 +13,18 @@ namespace TGC.MonoGame.TP.Cars
 
 		#region Properties
 		//current state
-		public int CurrentGear = 1;
-		public float CurrentSpeed = 0f;
-		public float CurrentWheelRotation = 0f;
-		public float CurrentSteeringWheelRotation = 0f;
-		public bool IsAccelerating = false;
-		public bool IsBraking = false;
-		public bool IsUsingBoost = false;
-		public bool IsTurningLeft = false;
-		public bool IsTurningRight = false;
-		public bool IsJumping = false;
+		private int CurrentGear = 1;
+		private float CurrentSpeed = 0f;
+		private float CurrentWheelRotation = 0f;
+		private float CurrentSteeringWheelRotation = 0f;
+		private bool IsAccelerating = false;
+		private bool IsBraking = false;
+		private bool IsUsingBoost = false;
+		private bool IsTurningLeft = false;
+		private bool IsTurningRight = false;
+		private bool IsJumping = false;
+		private bool GodMode = false;
+		private float GodModeCooldown = 0f;
 
 		//car specs
 		public float DefaultSteeringSpeed;
@@ -215,7 +217,7 @@ namespace TGC.MonoGame.TP.Cars
 			BoundingBox.Center += positionDelta;
 			BoundingBox.Orientation = Rotation;
 			// Check intersection for every collider
-			for (var index = 0; index < colliders.Length; index++)
+			for (var index = 0; !GodMode && index < colliders.Length; index++)
 			{
 				if (BoundingBox.Intersects(colliders[index]))
 				{
@@ -246,6 +248,18 @@ namespace TGC.MonoGame.TP.Cars
 		public float ToRadians(float angle)
 		{
 			return angle * (MathF.PI / 180f);
+		}
+
+		public void EnableGodMode()
+		{
+			GodMode = !GodMode;
+			GodModeCooldown = 0f;
+		}
+
+		public bool IsAbleToEnableGodMode(GameTime gameTime)
+		{
+			GodModeCooldown = MathF.Min(GodModeCooldown + Convert.ToSingle(gameTime.ElapsedGameTime.TotalSeconds), 0.5f);
+			return GodModeCooldown == 0.5f;
 		}
 		#endregion
 	}
