@@ -23,7 +23,7 @@ namespace TGC.MonoGame.TP
         public const string ContentFolderTextures = "Textures/";
         private BaseCar MainCar;
 		private TestScenario Scenario;
-		private FollowCamera FollowCamera;
+		private FollowCamera Camera;
 		/// <summary>
 		///     Constructor del juego.
 		/// </summary>
@@ -58,9 +58,9 @@ namespace TGC.MonoGame.TP
             Graphics.PreferredBackBufferWidth = GraphicsAdapter.DefaultAdapter.CurrentDisplayMode.Width - 250;
             Graphics.PreferredBackBufferHeight = GraphicsAdapter.DefaultAdapter.CurrentDisplayMode.Height - 250;
             Graphics.ApplyChanges();
-                
-            // Creo una camara para seguir a nuestro auto.
-            FollowCamera = new FollowCamera(GraphicsDevice.Viewport);
+
+			// Creo una camara para seguir a nuestro auto.
+			Camera = new FollowCamera(GraphicsDevice.Viewport);
 
 			base.Initialize();
         }
@@ -91,14 +91,15 @@ namespace TGC.MonoGame.TP
         {
             // Aca deberiamos poner toda la logica de actualizacion del juego.
             if (Keyboard.GetState().IsKeyDown(Keys.Escape)) Exit(); //Salgo del juego.
-			if (Keyboard.GetState().IsKeyDown(Keys.G)) Scenario.ChangeGizmosVisibility(); //Activo/Desactivo el gizmos
+			if (Scenario.IsAbleToChangeGizmosVisibility(gameTime) && Keyboard.GetState().IsKeyDown(Keys.G)) Scenario.ChangeGizmosVisibility(); //Activo/Desactivo el gizmos
+			if (Camera.IsAbleToChangeCamera(gameTime) && Keyboard.GetState().IsKeyDown(Keys.V)) Camera.ChangeCamera(); //Activo/Desactivo vista isometrica
 
 			// La logica debe ir aca.
 			MainCar.SetKeyboardState();
 			MainCar.Update(gameTime, Scenario.Colliders);
 
 			// Actualizo la camara, enviandole la matriz de mundo del auto.
-			FollowCamera.Update(gameTime, MainCar.World);
+			Camera.Update(gameTime, MainCar.World);
 
 			base.Update(gameTime);
         }
@@ -112,8 +113,8 @@ namespace TGC.MonoGame.TP
             // Aca deberiamos poner toda la logica de renderizado del juego.
             GraphicsDevice.Clear(Color.Black);
 
-			Scenario.Draw(gameTime, FollowCamera.View, FollowCamera.Projection);
-			MainCar.Draw(gameTime, FollowCamera.View, FollowCamera.Projection);
+			Scenario.Draw(gameTime, Camera.View, Camera.Projection);
+			MainCar.Draw(gameTime, Camera.View, Camera.Projection);
 		}
 
         /// <summary>

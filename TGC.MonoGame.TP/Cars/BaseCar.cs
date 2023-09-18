@@ -239,7 +239,7 @@ namespace TGC.MonoGame.TP.Cars
 			IsBraking = goingForward ? keyboardState.IsKeyDown(Keys.S) : keyboardState.IsKeyDown(Keys.W);
 			IsTurningLeft = keyboardState.IsKeyDown(Keys.A);
 			IsTurningRight = keyboardState.IsKeyDown(Keys.D);
-			IsUsingBoost = keyboardState.IsKeyDown(Keys.Space);
+			IsUsingBoost = keyboardState.IsKeyDown(Keys.LeftShift);
 			IsJumping = keyboardState.IsKeyDown(Keys.Space);
 		}
 

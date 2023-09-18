@@ -21,6 +21,7 @@ namespace TGC.MonoGame.TP.Scenarios
 		public BoundingBox[] Colliders;
 		public Gizmos Gizmos;
 		public bool ShowGizmos;
+		private float GizmosChangeCooldown = 0f;
 		// Floor
 		private Matrix FloorWorld;
 		private Texture2D FloorTexture;
@@ -65,7 +66,7 @@ namespace TGC.MonoGame.TP.Scenarios
 				// inner walls
 				Matrix.CreateScale(new Vector3(100f, 1f, 100f)) * Matrix.CreateRotationZ(MathHelper.PiOver2) * Matrix.CreateTranslation(Vector3.UnitZ * 100f + Vector3.UnitY * 100f)
 			};
-			Colliders = new BoundingBox[6];
+			Colliders = new BoundingBox[26];
 			Colliders[0] = new BoundingBox(new Vector3(-size- 0.25f, 0f, -size - 0.25f), new Vector3(size + 0.25f, size, -size + 0.25f));
 			Colliders[1] = new BoundingBox(new Vector3(-size - 0.25f, 0f, size - 0.25f), new Vector3(size + 0.25f, size, size + 0.25f));
 			Colliders[2] = new BoundingBox(new Vector3(size - 0.25f, 0f, -size - 0.25f), new Vector3(size + 0.25f, size, size + 0.25f));
@@ -94,6 +95,9 @@ namespace TGC.MonoGame.TP.Scenarios
 					Matrix.CreateScale(17f) * 
 					Matrix.CreateRotationY(-MathHelper.PiOver2) * 
 					Matrix.CreateTranslation((Vector3.UnitX * (size - 400f)) + (Vector3.UnitZ * 300f * (i < 10 ? -i : i-10)));
+				Colliders[6+i] = new BoundingBox(
+					new Vector3(size - 650f, 0f, i < 10 ? 300f * -i + 125f : 300f * (i - 10) - 125f),
+					new Vector3(size - 125f, 300f, i < 10 ? 300f * -i - 125f : 300f * (i - 10) + 125f));
 			}
 			AmbulanceModel = content.Load<Model>(ContentFolder3D + "ambulance");
 			AmbulanceBoneTransforms = new Matrix[AmbulanceModel.Bones.Count];
@@ -159,7 +163,14 @@ namespace TGC.MonoGame.TP.Scenarios
 
 		public void ChangeGizmosVisibility()
 		{
+			GizmosChangeCooldown = 0f;
 			ShowGizmos = !ShowGizmos;
+		}
+
+		public bool IsAbleToChangeGizmosVisibility(GameTime gameTime)
+		{
+			GizmosChangeCooldown = MathF.Min(GizmosChangeCooldown + Convert.ToSingle(gameTime.ElapsedGameTime.TotalSeconds), 0.3f);
+			return GizmosChangeCooldown == 0.3f;
 		}
 	}
 }
