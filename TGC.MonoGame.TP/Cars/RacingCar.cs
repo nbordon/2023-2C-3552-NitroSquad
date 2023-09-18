@@ -1,6 +1,7 @@
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
+using TGC.MonoGame.TP.Misc;
 
 namespace TGC.MonoGame.TP.Cars
 {
@@ -12,6 +13,10 @@ namespace TGC.MonoGame.TP.Cars
 			CarTexture = content.Load<Texture2D>(ContentFolder3D + "racingcar/Vehicle_basecolor");
 			Effect = content.Load<Effect>(ContentFolderEffects + "BasicShader");
 			Effect.Parameters["ModelTexture"].SetValue(CarTexture);
+			var temporaryCubeAABB = BoundingVolumesExtensions.CreateAABBFrom(Model);
+			BoundingBox = OrientedBoundingBox.FromAABB(temporaryCubeAABB);
+			BoundingBox.Center = Vector3.One;
+			BoundingBox.Orientation = Matrix.CreateRotationY(0f);
 
 			FrontRightWheelBone = Model.Bones["WheelA"];
             FrontLeftWheelBone = Model.Bones["WheelB"];

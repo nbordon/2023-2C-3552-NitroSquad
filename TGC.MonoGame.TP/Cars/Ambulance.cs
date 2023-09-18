@@ -1,6 +1,7 @@
 ﻿using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework;
+using TGC.MonoGame.TP.Misc;
 
 namespace TGC.MonoGame.TP.Cars
 {
@@ -11,7 +12,11 @@ namespace TGC.MonoGame.TP.Cars
 			Model = content.Load<Model>(ContentFolder3D + "ambulance");
 			Effect = content.Load<Effect>(ContentFolderEffects + "BasicShader");
 			CarTexture = content.Load<Texture2D>(ContentFolder3D + "tex/Palette");
-			Effect.Parameters["ModelTexture"].SetValue(CarTexture);
+			//Effect.Parameters["ModelTexture"].SetValue(CarTexture);
+			var temporaryCubeAABB = BoundingVolumesExtensions.CreateAABBFrom(Model);
+			BoundingBox = OrientedBoundingBox.FromAABB(temporaryCubeAABB);
+			BoundingBox.Center = Vector3.One;
+			BoundingBox.Orientation = Matrix.CreateRotationY(0f);
 
 			FrontRightWheelBone = Model.Bones["wheel_frontLeft"];
 			FrontLeftWheelBone = Model.Bones["wheel_frontRight"];
@@ -25,11 +30,11 @@ namespace TGC.MonoGame.TP.Cars
 			BackRightWheelTransform = BackRightWheelBone.Transform;
 			BoneTransforms = new Matrix[Model.Bones.Count];
 
-			foreach (var mesh in Model.Meshes)
-			{
-				foreach (var meshPart in mesh.MeshParts)
-					meshPart.Effect = Effect;
-			}
+			//foreach (var mesh in Model.Meshes)
+			//{
+			//	foreach (var meshPart in mesh.MeshParts)
+			//		meshPart.Effect = Effect;
+			//}
 
 			DefaultSteeringSpeed = 0.03f;
 			DefaultSteeringRotation = 25f;

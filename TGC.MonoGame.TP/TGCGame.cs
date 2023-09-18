@@ -22,9 +22,8 @@ namespace TGC.MonoGame.TP
         public const string ContentFolderSpriteFonts = "SpriteFonts/";
         public const string ContentFolderTextures = "Textures/";
         private BaseCar MainCar;
-		private TestScenario TestScenario;
+		private TestScenario Scenario;
 		private FollowCamera FollowCamera;
-
 		/// <summary>
 		///     Constructor del juego.
 		/// </summary>
@@ -61,7 +60,7 @@ namespace TGC.MonoGame.TP
             Graphics.ApplyChanges();
                 
             // Creo una camara para seguir a nuestro auto.
-            FollowCamera = new FollowCamera(GraphicsDevice.Viewport.AspectRatio);
+            FollowCamera = new FollowCamera(GraphicsDevice.Viewport);
 
 			base.Initialize();
         }
@@ -77,7 +76,7 @@ namespace TGC.MonoGame.TP
             SpriteBatch = new SpriteBatch(GraphicsDevice);
 
 			// La carga de contenido debe ser realizada aca.
-			TestScenario = new TestScenario(Content, GraphicsDevice);
+			Scenario = new TestScenario(Content, GraphicsDevice);
 			MainCar = new RacingCar(Content);
 
 			base.LoadContent();
@@ -92,15 +91,16 @@ namespace TGC.MonoGame.TP
         {
             // Aca deberiamos poner toda la logica de actualizacion del juego.
             if (Keyboard.GetState().IsKeyDown(Keys.Escape)) Exit(); //Salgo del juego.
+			if (Keyboard.GetState().IsKeyDown(Keys.G)) Scenario.ChangeGizmosVisibility(); //Activo/Desactivo el gizmos
 
 			// La logica debe ir aca.
 			MainCar.SetKeyboardState();
-			MainCar.Update(gameTime);
+			MainCar.Update(gameTime, Scenario.Colliders);
 
 			// Actualizo la camara, enviandole la matriz de mundo del auto.
 			FollowCamera.Update(gameTime, MainCar.World);
 
-            base.Update(gameTime);
+			base.Update(gameTime);
         }
 
         /// <summary>
@@ -112,10 +112,7 @@ namespace TGC.MonoGame.TP
             // Aca deberiamos poner toda la logica de renderizado del juego.
             GraphicsDevice.Clear(Color.Black);
 
-			// Dibujo la ciudad.
-			TestScenario.Draw(gameTime, FollowCamera.View, FollowCamera.Projection);
-
-			// El dibujo del auto debe ir aca.
+			Scenario.Draw(gameTime, FollowCamera.View, FollowCamera.Projection);
 			MainCar.Draw(gameTime, FollowCamera.View, FollowCamera.Projection);
 		}
 
@@ -124,8 +121,9 @@ namespace TGC.MonoGame.TP
         /// </summary>
         protected override void UnloadContent()
         {
-            // Libero los recursos.
-            Content.Unload();
+			// Libero los recursos.
+			Scenario.Gizmos.Dispose();
+			Content.Unload();
 
             base.UnloadContent();
         }

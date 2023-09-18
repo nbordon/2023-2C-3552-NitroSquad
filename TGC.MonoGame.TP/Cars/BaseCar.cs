@@ -2,6 +2,7 @@
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using System;
+using TGC.MonoGame.TP.Misc;
 
 namespace TGC.MonoGame.TP.Cars
 {
@@ -43,6 +44,7 @@ namespace TGC.MonoGame.TP.Cars
 		public Vector3 Position = Vector3.Zero;
 		public Vector3 Direction = Vector3.Backward;
 		public Vector3 DirectionSpeed = Vector3.Backward;
+		public OrientedBoundingBox BoundingBox;
 
 		public ModelBone FrontRightWheelBone;
 		public ModelBone FrontLeftWheelBone;
@@ -60,8 +62,9 @@ namespace TGC.MonoGame.TP.Cars
 
 		public BaseCar() { }
 
-		public void Update(GameTime gameTime)
+		public void Update(GameTime gameTime, BoundingBox[] colliders)
 		{
+			var previousPosition = Position;
 			var elapsedTime = Convert.ToSingle(gameTime.ElapsedGameTime.TotalSeconds);
 			if (Position.Y == 0f)
 			{
@@ -86,6 +89,9 @@ namespace TGC.MonoGame.TP.Cars
 				Position.Y = 0f;
 				DirectionSpeed.Y = 0f;
 			}
+
+			if (Position != previousPosition)
+				Position -= CheckForCollisions(Position - previousPosition, colliders);
 
 			World = Scale * Rotation * Matrix.CreateTranslation(Position);
 		}
@@ -202,6 +208,25 @@ namespace TGC.MonoGame.TP.Cars
 		public void Jump()
 		{
 			DirectionSpeed += Vector3.Up * DefaultJumpSpeed;
+		}
+
+		private Vector3 CheckForCollisions(Vector3 positionDelta, BoundingBox[] colliders)
+		{
+			BoundingBox.Center += positionDelta;
+			BoundingBox.Orientation = Rotation;
+			// Check intersection for every collider
+			for (var index = 0; index < colliders.Length; index++)
+			{
+				if (BoundingBox.Intersects(colliders[index]))
+				{
+					BoundingBox.Center -= positionDelta * 1.5f;
+					CurrentSpeed = - CurrentSpeed * 0.3f;
+					CurrentGear = 1;
+					return positionDelta * 1.5f;
+				}
+				continue;
+			}
+			return Vector3.Zero;
 		}
 		#endregion
 

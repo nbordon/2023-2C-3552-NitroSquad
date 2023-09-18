@@ -1,7 +1,6 @@
 ﻿using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
 using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace TGC.MonoGame.TP.Cameras
 {
@@ -10,7 +9,7 @@ namespace TGC.MonoGame.TP.Cameras
     /// </summary>
     class FollowCamera
     {
-        private const float AxisDistanceToTarget = 1500f;
+        private const float CameraHeight = 2050f;
 
         private const float AngleFollowSpeed = 0.055f;
 
@@ -30,15 +29,15 @@ namespace TGC.MonoGame.TP.Cameras
         /// Crea una FollowCamera que sigue a una matriz de mundo
         /// </summary>
         /// <param name="aspectRatio"></param>
-        public FollowCamera(float aspectRatio)
+        public FollowCamera(Viewport viewport)
         {
             // Orthographic camera
-            // Projection = Matrix.CreateOrthographic(screenWidth, screenHeight, 0.01f, 10000f);
+            // Projection = Matrix.CreateOrthographic(viewport.Width * 3f, viewport.Height * 3f, 0.01f, 10000f); // for isometric view
 
-            // Perspective camera
-            // Uso 60° como FOV, aspect ratio, pongo las distancias a near plane y far plane en 0.1 y 100000 (mucho) respectivamente
-            Projection = Matrix.CreatePerspectiveFieldOfView(MathF.PI / 3f, aspectRatio, 0.1f, 100000f);
-        }
+			// Perspective camera
+			// Uso 60° como FOV, aspect ratio, pongo las distancias a near plane y far plane en 0.1 y 100000 (mucho) respectivamente
+			 Projection = Matrix.CreatePerspectiveFieldOfView(MathF.PI / 3f, viewport.AspectRatio, 0.1f, 100000f);
+		}
 
         /// <summary>
         /// Actualiza la Camara usando una matriz de mundo actualizada para seguirla
@@ -54,12 +53,13 @@ namespace TGC.MonoGame.TP.Cameras
             var followedPosition = followedWorld.Translation;
 
             // Obtengo el vector Derecha de la matriz de mundo que estoy siguiendo
-            var followedFront = followedWorld.Forward;
+            var followedFront = followedWorld.Forward * 1f; // Camera depth  
+			// var followedFront = Vector3.One; // for isometric view
 
-            // Si el producto escalar entre el vector Derecha anterior
-            // y el actual es mas grande que un limite,
-            // muevo el Interpolator (desde 0 a 1) mas cerca de 1
-            if (Vector3.Dot(followedFront, PastFrontVector) > AngleThreshold)
+			// Si el producto escalar entre el vector Derecha anterior
+			// y el actual es mas grande que un limite,
+			// muevo el Interpolator (desde 0 a 1) mas cerca de 1
+			if (Vector3.Dot(followedFront, PastFrontVector) > AngleThreshold)
             {
                 // Incremento el Interpolator
                 FrontVectorInterpolator += elapsedTime * AngleFollowSpeed;
@@ -83,8 +83,8 @@ namespace TGC.MonoGame.TP.Cameras
             // Calculo la posicion del a camara
             // tomo la posicion que estoy siguiendo, agrego un offset en los ejes Y y Derecha
             var offsetedPosition = followedPosition
-                + CurrentFrontVector * AxisDistanceToTarget
-                + Vector3.Up * AxisDistanceToTarget;
+                + CurrentFrontVector * CameraHeight
+                + Vector3.Up * CameraHeight;
 
             // Calculo el vector Arriba actualizado
             // Nota: No se puede usar el vector Arriba por defecto (0, 1, 0)
@@ -105,8 +105,8 @@ namespace TGC.MonoGame.TP.Cameras
             var cameraCorrectUp = Vector3.Cross(Front, forward);
 
             // Calculo la matriz de Vista de la camara usando la Posicion, La Posicion a donde esta mirando,
-            // y su vector Arriba
+            //wd y su vector Arriba
             View = Matrix.CreateLookAt(offsetedPosition, followedPosition, cameraCorrectUp);
-        }
+		}
     }
 }
