@@ -21,7 +21,7 @@ namespace TGC.MonoGame.TP
         public const string ContentFolderSounds = "Sounds/";
         public const string ContentFolderSpriteFonts = "SpriteFonts/";
         public const string ContentFolderTextures = "Textures/";
-        private BaseCar MainCar;
+        private RacingCar MainCar;
 		private TestScenario Scenario;
 		private FollowCamera Camera;
 		/// <summary>
@@ -77,7 +77,7 @@ namespace TGC.MonoGame.TP
 
 			// La carga de contenido debe ser realizada aca.
 			Scenario = new TestScenario(Content, GraphicsDevice);
-			MainCar = new RacingCar(Content);
+			MainCar = new RacingCar(Content, GraphicsDevice, Scenario.MainCarStartRotation, Scenario.MainCarStartPosition);
 
 			base.LoadContent();
         }
@@ -93,11 +93,10 @@ namespace TGC.MonoGame.TP
             if (Keyboard.GetState().IsKeyDown(Keys.Escape)) Exit(); //Salgo del juego.
 			if (Scenario.IsAbleToChangeGizmosVisibility(gameTime) && Keyboard.GetState().IsKeyDown(Keys.G)) Scenario.ChangeGizmosVisibility(); //Activo/Desactivo el gizmos
 			if (Camera.IsAbleToChangeCamera(gameTime) && Keyboard.GetState().IsKeyDown(Keys.V)) Camera.ChangeCamera();
-			if (MainCar.IsAbleToEnableGodMode(gameTime) && Keyboard.GetState().IsKeyDown(Keys.P)) MainCar.EnableGodMode();
 
 			// La logica debe ir aca.
-			MainCar.SetKeyboardState();
-			MainCar.Update(gameTime, Scenario.Colliders);
+			Scenario.Update(gameTime);
+			MainCar.Update(gameTime, Scenario.Colliders, Scenario.PowerUps);
 
 			// Actualizo la camara, enviandole la matriz de mundo del auto.
 			Camera.Update(gameTime, MainCar.World);
@@ -114,8 +113,8 @@ namespace TGC.MonoGame.TP
             // Aca deberiamos poner toda la logica de renderizado del juego.
             GraphicsDevice.Clear(Color.Black);
 
-			Scenario.Draw(gameTime, Camera.View, Camera.Projection);
-			MainCar.Draw(gameTime, Camera.View, Camera.Projection);
+			Scenario.Draw(Camera.View, Camera.Projection, Camera.CurrentCameraPosition);
+			MainCar.Draw(Camera.View, Camera.Projection, Camera.CurrentCameraPosition);
 		}
 
         /// <summary>
@@ -124,7 +123,7 @@ namespace TGC.MonoGame.TP
         protected override void UnloadContent()
         {
 			// Libero los recursos.
-			Scenario.Gizmos.Dispose();
+			Scenario.Dispose();
 			Content.Unload();
 
             base.UnloadContent();

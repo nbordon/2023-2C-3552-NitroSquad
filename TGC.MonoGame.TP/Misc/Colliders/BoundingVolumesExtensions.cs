@@ -2,7 +2,7 @@
 using Microsoft.Xna.Framework.Graphics;
 using System;
 
-namespace TGC.MonoGame.TP.Misc
+namespace TGC.MonoGame.TP.Misc.Colliders
 {
     /// <summary>
     ///     Class that extends BoundingVolumes classes
@@ -19,7 +19,7 @@ namespace TGC.MonoGame.TP.Misc
             var max = box.Max;
             var min = box.Min;
 
-            return (max - min) * 0.5f;            
+            return (max - min) * 0.5f;
         }
 
         /// <summary>

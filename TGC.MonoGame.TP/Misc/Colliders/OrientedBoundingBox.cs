@@ -1,31 +1,13 @@
 ﻿using Microsoft.Xna.Framework;
 using System;
 
-namespace TGC.MonoGame.TP.Misc
+namespace TGC.MonoGame.TP.Misc.Colliders
 {
     /// <summary>
     ///     Represents an Oriented-BoundingBox (OBB).
     /// </summary>
-    public class OrientedBoundingBox
-    {
-        /// <summary>
-        ///     Center.
-        /// </summary>
-        public Vector3 Center { get; set; }
-
-        /// <summary>
-        ///     Orientation 
-        /// </summary>
-        public Matrix Orientation { get; set; }
-
-        /// <summary>
-        ///     Extents
-        /// </summary>
-        public Vector3 Extents { get; set; }
-
-
-
-
+    public class OrientedBoundingBox : BaseCollider
+	{
         /// <summary>
         ///     Builds an empty Bounding Oriented Box.
         /// </summary>
@@ -204,35 +186,33 @@ namespace TGC.MonoGame.TP.Misc
         /// </summary>
         /// <param name="box">The other OBB to test</param>
         /// <returns>True if the two boxes intersect</returns>
-        public bool Intersects(OrientedBoundingBox box)
+        public override bool Intersects(BaseCollider collider)
         {
             float ra;
             float rb;
             var R = new float[3, 3];
             var AbsR = new float[3, 3];
             var ae = ToArray(Extents);
-            var be = ToArray(box.Extents);
+            var be = ToArray(collider.Extents);
 
             // Compute rotation matrix expressing the other box in this box coordinate frame
 
-            var result = ToFloatArray(Matrix.Multiply(Orientation, box.Orientation));
+            var result = ToFloatArray(Matrix.Multiply(Orientation, collider.Orientation));
 
             for (var i = 0; i < 3; i++)
-                 for (var j = 0; j < 3; j++)
-                     R[i, j] = result[i * 3 + j];
-            
+                for (var j = 0; j < 3; j++)
+                    R[i, j] = result[i * 3 + j];
+
 
             // Compute translation vector t
-            var tVec = box.Center - Center;
+            var tVec = collider.Center - Center;
 
             // Bring translation into this boxs coordinate frame
-
             var t = ToArray(Vector3.Transform(tVec, Orientation));
 
             // Compute common subexpressions. Add in an epsilon term to
             // counteract arithmetic errors when two edges are parallel and
             // their cross product is (near) null (see text for details)
-
             for (var i = 0; i < 3; i++)
                 for (var j = 0; j < 3; j++)
                     AbsR[i, j] = MathF.Abs(R[i, j]) + float.Epsilon;
@@ -425,5 +405,5 @@ namespace TGC.MonoGame.TP.Misc
         }
 
     }
-    
+
 }

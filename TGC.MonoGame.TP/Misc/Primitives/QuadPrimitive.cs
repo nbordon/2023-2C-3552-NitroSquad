@@ -1,7 +1,7 @@
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 
-namespace TGC.MonoGame.TP.Misc
+namespace TGC.MonoGame.TP.Misc.Primitives
 {
     /// <summary>
     ///     The quad is like a plane but its made by two triangle and the surface is oriented in the XY plane of the local
@@ -17,10 +17,6 @@ namespace TGC.MonoGame.TP.Misc
         {
             CreateVertexBuffer(graphicsDevice);
             CreateIndexBuffer(graphicsDevice);
-
-            Effect = new BasicEffect(graphicsDevice);
-            Effect.TextureEnabled = true;
-            Effect.EnableDefaultLighting();
         }
 
         /// <summary>
@@ -32,12 +28,6 @@ namespace TGC.MonoGame.TP.Misc
         ///     Describes the rendering order of the vertices in a vertex buffer, using counter-clockwise winding.
         /// </summary>
         private IndexBuffer Indices { get; set; }
-
-
-        /// <summary>
-        ///     Built-in effect that supports optional texturing, vertex coloring, fog, and lighting.
-        /// </summary>
-        public BasicEffect Effect { get; private set; }
 
         /// <summary>
         ///     Create a vertex buffer for the figure with the given information.
@@ -84,29 +74,6 @@ namespace TGC.MonoGame.TP.Misc
             Indices.SetData(indices);
         }
 
-        /// <summary>
-        ///     Draw the Quad.
-        /// </summary>
-        /// <param name="world">The world matrix for this box.</param>
-        /// <param name="view">The view matrix, normally from the camera.</param>
-        /// <param name="projection">The projection matrix, normally from the application.</param>
-        public void Draw(Matrix world, Matrix view, Matrix projection)
-        {
-            // Set BasicEffect parameters.
-            Effect.World = world;
-            Effect.View = view;
-            Effect.Projection = projection;
-
-            // Draw the model, using BasicEffect.
-            Draw(Effect);
-        }
-
-        /// <summary>
-        ///     Draws the primitive model, using the specified effect. Unlike the other Draw overload where you just specify the
-        ///     world/view/projection matrices and color, this method does not set any render states, so you must make sure all
-        ///     states are set to sensible values before you call it.
-        /// </summary>
-        /// <param name="effect">Used to set and query effects, and to choose techniques.</param>
         public void Draw(Effect effect)
         {
             var graphicsDevice = effect.GraphicsDevice;

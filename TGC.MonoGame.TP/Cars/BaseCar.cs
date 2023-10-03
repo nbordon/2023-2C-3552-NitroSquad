@@ -3,10 +3,12 @@ using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using System;
 using TGC.MonoGame.TP.Misc;
+using TGC.MonoGame.TP.Misc.Colliders;
+using TGC.MonoGame.TP.Misc.Gizmos;
 
 namespace TGC.MonoGame.TP.Cars
 {
-	class BaseCar
+    class BaseCar
 	{
 		public const string ContentFolder3D = "Models/";
 		public const string ContentFolderEffects = "Effects/";
@@ -25,6 +27,12 @@ namespace TGC.MonoGame.TP.Cars
 		private bool IsJumping = false;
 		private bool GodMode = false;
 		private float GodModeCooldown = 0f;
+		private float GizmosCooldown = 0f;
+
+		//Power Ups
+		private float RemainingBoost = 0f;  // in seconds
+		private int RemainingMissiles = 0;
+		private bool HasShield = false;
 
 		//car specs
 		public float DefaultSteeringSpeed;
@@ -34,19 +42,22 @@ namespace TGC.MonoGame.TP.Cars
 		public float DefaultBoostSpeed;
 		public float[] MaxSpeed;
 		public float[] Acceleration;
+		public float MaxBoost = 0f;
 
 		// todo: global
 		public const float Gravity = 50f;
 
 		public Effect Effect;
 		public Model Model;
-		public Matrix World = Matrix.Identity;
+		public Matrix World;
 		public Matrix Rotation = Matrix.Identity;
 		public Matrix Scale = Matrix.Identity;
 		public Vector3 Position = Vector3.Zero;
 		public Vector3 Direction = Vector3.Backward;
 		public Vector3 DirectionSpeed = Vector3.Backward;
 		public OrientedBoundingBox BoundingBox;
+		public Gizmos Gizmos;
+		public bool ShowGizmos;
 
 		public ModelBone FrontRightWheelBone;
 		public ModelBone FrontLeftWheelBone;
@@ -59,20 +70,25 @@ namespace TGC.MonoGame.TP.Cars
 		public Matrix BackRightWheelTransform;
 		public Matrix CarTransform;
 		public Matrix[] BoneTransforms;
-		public Texture2D CarTexture;
+		public Texture2D BaseTexture;
+		public Texture2D NormalTexture;
+		public Texture2D RoughnessTexture;
+		public Texture2D MetallicTexture;
+		public Texture2D AoTexture;
 		#endregion Properties
 
 		public BaseCar() { }
 
-		public void Update(GameTime gameTime, BoundingBox[] colliders)
+		public void Update(GameTime gameTime, BaseCollider[] colliders, PowerUp[] powerups)
 		{
+			SetKeyboardState(gameTime);
 			var previousPosition = Position;
 			var elapsedTime = Convert.ToSingle(gameTime.ElapsedGameTime.TotalSeconds);
 			if (Position.Y == 0f)
 			{
 				// para tener control sobre el auto hice que deba estar sobre el suelo, ninguna razon en particular, me gusto asi
-				Turn();
 				Drive(elapsedTime);
+				Turn();
 				if (IsJumping) Jump();
 			}
 			else
@@ -93,12 +109,12 @@ namespace TGC.MonoGame.TP.Cars
 			}
 
 			if (Position != previousPosition)
-				Position -= CheckForCollisions(Position - previousPosition, colliders);
+				Position -= CheckForCollisions(Position - previousPosition, colliders, powerups);
 
 			World = Scale * Rotation * Matrix.CreateTranslation(Position);
 		}
 
-		public void Draw(GameTime gameTime, Matrix view, Matrix projection)
+		public void Draw(Matrix view, Matrix projection)
 		{
 			// Set the world matrix as the root transform of the model.
 			Model.Root.Transform = World;
@@ -122,9 +138,15 @@ namespace TGC.MonoGame.TP.Cars
 				// Obtain the world matrix for that mesh (relative to the parent)
 				var meshWorld = BoneTransforms[mesh.ParentBone.Index];
 				Effect.Parameters["World"].SetValue(meshWorld);
-				Effect.Parameters["View"].SetValue(view);
-				Effect.Parameters["Projection"].SetValue(projection);
+				Effect.Parameters["WorldViewProjection"].SetValue(meshWorld * view * projection);
+				Effect.Parameters["NormalWorldMatrix"].SetValue(Matrix.Invert(Matrix.Transpose(meshWorld)));
 				mesh.Draw();
+				if (ShowGizmos) Gizmos.Draw();
+			}
+			if (ShowGizmos)
+			{
+				Gizmos.UpdateViewProjection(view, projection);
+				Gizmos.DrawCube(Matrix.CreateScale(BoundingBox.Extents * 2f) * BoundingBox.Orientation * Matrix.CreateTranslation(BoundingBox.Center), Color.Red);
 			}
 		}
 
@@ -139,10 +161,19 @@ namespace TGC.MonoGame.TP.Cars
 
 			if (IsAccelerating)
 			{
-				float boost = IsUsingBoost ? DefaultBoostSpeed : 1f;
-				CurrentSpeed += Acceleration[CurrentGear] * boost;
-				if (CurrentSpeed > MaxSpeed[CurrentGear] && CurrentGear < MaxSpeed.Length - 1) CurrentGear++;
-				CurrentSpeed = CurrentSpeed > MaxSpeed[CurrentGear] * boost ? MaxSpeed[CurrentGear] * boost : CurrentSpeed;
+				if (IsUsingBoost && (GodMode || RemainingBoost > 0f))
+				{
+					CurrentSpeed += Acceleration[CurrentGear] * DefaultBoostSpeed;
+					if (CurrentSpeed > MaxSpeed[CurrentGear] && CurrentGear < MaxSpeed.Length - 1) CurrentGear++;
+					CurrentSpeed = CurrentSpeed > MaxSpeed[CurrentGear] * (DefaultBoostSpeed / 10f) ? MaxSpeed[CurrentGear] * (DefaultBoostSpeed / 10f) : CurrentSpeed;
+					RemainingBoost = Math.Max(RemainingBoost - elapsedTime, 0f);
+				}
+				else
+				{
+					CurrentSpeed += Acceleration[CurrentGear];
+					if (CurrentSpeed > MaxSpeed[CurrentGear] && CurrentGear < MaxSpeed.Length - 1) CurrentGear++;
+					CurrentSpeed = CurrentSpeed > MaxSpeed[CurrentGear] ? MaxSpeed[CurrentGear] : CurrentSpeed;
+				}
 			}
 
 			if (IsBraking)
@@ -212,10 +243,32 @@ namespace TGC.MonoGame.TP.Cars
 			DirectionSpeed += Vector3.Up * DefaultJumpSpeed;
 		}
 
-		private Vector3 CheckForCollisions(Vector3 positionDelta, BoundingBox[] colliders)
+		private Vector3 CheckForCollisions(Vector3 positionDelta, BaseCollider[] colliders, PowerUp[] powerups)
 		{
 			BoundingBox.Center += positionDelta;
 			BoundingBox.Orientation = Rotation;
+			// Check intersection for every active powerup
+			for (var index = 0; index < powerups.Length; index++)
+			{
+				if (powerups[index].IsActive && BoundingBox.Intersects(powerups[index].Collider))
+				{
+					powerups[index].Hide();
+					switch (powerups[index].Type)
+					{
+						case PowerUpType.Boost:
+							RemainingBoost = Math.Min(RemainingBoost + 3f, MaxBoost);
+							break;
+						case PowerUpType.Missiles:
+							RemainingMissiles = 3;
+							break;
+						case PowerUpType.Shield:
+							HasShield = true;
+							break;
+					}
+					return Vector3.Zero;
+				}
+				continue;
+			}
 			// Check intersection for every collider
 			for (var index = 0; !GodMode && index < colliders.Length; index++)
 			{
@@ -233,7 +286,7 @@ namespace TGC.MonoGame.TP.Cars
 		#endregion
 
 		#region utils
-		public void SetKeyboardState()
+		public void SetKeyboardState(GameTime gameTime)
 		{
 			KeyboardState keyboardState = Keyboard.GetState();
 			bool goingForward = CurrentSpeed >= 0;
@@ -243,6 +296,8 @@ namespace TGC.MonoGame.TP.Cars
 			IsTurningRight = keyboardState.IsKeyDown(Keys.D);
 			IsUsingBoost = keyboardState.IsKeyDown(Keys.LeftShift);
 			IsJumping = keyboardState.IsKeyDown(Keys.Space);
+			if (IsAbleToChangeGodMode(gameTime) && Keyboard.GetState().IsKeyDown(Keys.P)) EnableGodMode();
+			if (IsAbleToChangeGizmosVisibility(gameTime) && Keyboard.GetState().IsKeyDown(Keys.G)) ChangeGizmosVisibility();
 		}
 
 		public float ToRadians(float angle)
@@ -256,10 +311,21 @@ namespace TGC.MonoGame.TP.Cars
 			GodModeCooldown = 0f;
 		}
 
-		public bool IsAbleToEnableGodMode(GameTime gameTime)
+		public bool IsAbleToChangeGodMode(GameTime gameTime)
 		{
 			GodModeCooldown = MathF.Min(GodModeCooldown + Convert.ToSingle(gameTime.ElapsedGameTime.TotalSeconds), 0.5f);
 			return GodModeCooldown == 0.5f;
+		}
+		public void ChangeGizmosVisibility()
+		{
+			ShowGizmos = !ShowGizmos;
+			GizmosCooldown = 0f;
+		}
+
+		public bool IsAbleToChangeGizmosVisibility(GameTime gameTime)
+		{
+			GizmosCooldown = MathF.Min(GizmosCooldown + Convert.ToSingle(gameTime.ElapsedGameTime.TotalSeconds), 0.5f);
+			return GizmosCooldown == 0.5f;
 		}
 		#endregion
 	}

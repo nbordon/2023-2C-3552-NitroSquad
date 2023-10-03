@@ -1,17 +1,17 @@
 ﻿using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework;
-using TGC.MonoGame.TP.Misc;
+using TGC.MonoGame.TP.Misc.Colliders;
 
 namespace TGC.MonoGame.TP.Cars
 {
-	class Ambulance : BaseCar
+    class Ambulance : BaseCar
 	{
 		public Ambulance(ContentManager content)
 		{
 			Model = content.Load<Model>(ContentFolder3D + "ambulance");
 			Effect = content.Load<Effect>(ContentFolderEffects + "BasicShader");
-			CarTexture = content.Load<Texture2D>(ContentFolder3D + "tex/Palette");
+			//CarTexture = content.Load<Texture2D>(ContentFolder3D + "tex/Palette");
 			//Effect.Parameters["ModelTexture"].SetValue(CarTexture);
 			var temporaryCubeAABB = BoundingVolumesExtensions.CreateAABBFrom(Model);
 			BoundingBox = OrientedBoundingBox.FromAABB(temporaryCubeAABB);

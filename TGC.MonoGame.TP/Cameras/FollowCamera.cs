@@ -14,7 +14,7 @@ namespace TGC.MonoGame.TP.Cameras
         public Matrix View { get; private set; }
 
         private float FrontVectorInterpolator { get; set; } = 0f;
-		private Vector3 CurrentCameraPosition { get; set; } = Vector3.Forward;
+		public Vector3 CurrentCameraPosition { get; set; } = Vector3.Forward;
 		private Vector3 PreviousCameraPosition = Vector3.Forward;
 		private int CameraType = 0;
 		private float CameraChangeCooldown = 0f;
@@ -29,7 +29,10 @@ namespace TGC.MonoGame.TP.Cameras
 			Viewport = viewport;
 			// Perspective camera
 			// Uso 60° como FOV, aspect ratio, pongo las distancias a near plane y far plane en 0.1 y 100000 (mucho) respectivamente
-			Projection = Matrix.CreatePerspectiveFieldOfView(MathF.PI / 3f, viewport.AspectRatio, 0.1f, 100000f);
+			//Projection = Matrix.CreatePerspectiveFieldOfView(MathF.PI / 3f, viewport.AspectRatio, 0.1f, 100000f);
+
+			Projection = Matrix.CreateOrthographic(Viewport.Width * 3f, Viewport.Height * 3f, 0.01f, 10000f); // Change to Orthographic camera
+			CameraType = 4;
 		}
 
 		/// <summary>
@@ -54,20 +57,24 @@ namespace TGC.MonoGame.TP.Cameras
 					cameraHeight = 2500f;
 					break;
 				case 1:
+					cameraDepth = 1000f;
+					cameraHeight = 500f;
+					break;
+				case 2:
 					cameraDepth = 750f;
 					cameraHeight = 100f;
 					targetPosition += Vector3.Up * cameraHeight * 2f;
 					break;
-				case 2:
+				case 3:
 					cameraDepth = 750f;
 					cameraHeight = 100f;
 					targetPosition += Vector3.Up * cameraHeight * 2f;
 					angleThreshold = 1f; // para no rotar la camara
 					break;
 				default: // para la vista isometrica
-					newCameraPosition = Vector3.One;
-					cameraDepth = 1000f;
-					cameraHeight = 1000f;
+					newCameraPosition = Vector3.One * 2f;
+					cameraDepth = 2000f;
+					cameraHeight = 2000f;
 					break;
 			};
 
@@ -99,17 +106,17 @@ namespace TGC.MonoGame.TP.Cameras
 
             // Calcular el vector Adelante haciendo la resta entre el destino y el origen
             // y luego normalizandolo (Esta operacion es cara!) (La siguiente operacion necesita vectores normalizados)
-            var position = targetPosition - offsetedPosition;
-			position.Normalize();
+            var backPosition = targetPosition - offsetedPosition;
+			backPosition.Normalize();
 
             // Obtengo el vector Derecha asumiendo que la camara tiene el vector Arriba apuntando hacia arriba y no esta rotada en el eje X (Roll)
-            var upPosition = Vector3.Cross(position, Vector3.Up);
+            var upPosition = Vector3.Cross(backPosition, Vector3.Up);
 
             // Una vez que tengo la correcta direccion Derecha, obtengo la correcta direccion Arriba usando otro producto vectorial
-            var cameraCorrectUp = Vector3.Cross(upPosition, position);
+            var cameraCorrectUp = Vector3.Cross(upPosition, backPosition);
 
-            // Calculo la matriz de Vista de la camara usando la Posicion, La Posicion a donde esta mirando, y su vector Arriba
-            View = Matrix.CreateLookAt(offsetedPosition, targetPosition, cameraCorrectUp);
+			// Calculo la matriz de Vista de la camara usando la Posicion, La Posicion a donde esta mirando, y su vector Arriba
+			View = Matrix.CreateLookAt(offsetedPosition, targetPosition, cameraCorrectUp);
 
 			PreviousCameraPosition = newCameraPosition;
 		}
@@ -118,9 +125,9 @@ namespace TGC.MonoGame.TP.Cameras
         {
             CameraChangeCooldown = 0f;
             CameraType++;
-			if (CameraType == 3)
+			if (CameraType == 4)
 				Projection = Matrix.CreateOrthographic(Viewport.Width * 3f, Viewport.Height * 3f, 0.01f, 10000f); // Change to Orthographic camera
-			else if (CameraType > 3)
+			else if (CameraType > 4)
 			{
 				Projection = Matrix.CreatePerspectiveFieldOfView(MathF.PI / 3f, Viewport.AspectRatio, 0.1f, 100000f); // Back to Perspective camera
 				CameraType = 0;
